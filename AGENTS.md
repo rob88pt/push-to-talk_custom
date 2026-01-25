@@ -71,11 +71,6 @@ For detailed guides on adding new providers or config fields, see [docs/developm
 
 ### Important Instructions
 
-#### File Creation Policy
-- NEVER create files unless they're absolutely necessary for achieving your goal
-- ALWAYS prefer editing an existing file to creating a new one
-- NEVER proactively create documentation files (*.md) or README files unless explicitly requested by the user
-
 #### Logging System
 The application uses loguru instead of Python's standard logging:
 - Import: `from loguru import logger` (not `import logging`)
