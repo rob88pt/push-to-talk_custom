@@ -1,0 +1,48 @@
+# PushToTalk Custom - Session Handoff
+
+Read this file to continue where the previous session left off.
+
+## Project Location
+`D:\Push_to_talk`
+
+## User's Goal
+Clone the `push-to-talk_custom` repository, set it up in `D:\Push_to_talk`, and verify the environment for further development.
+
+---
+
+## Files Created
+| File                                                              | Purpose                         |
+| ----------------------------------------------------------------- | ------------------------------- |
+| `D:\Push_to_talk\docs\active_context.md`                          | Session snapshot and next steps |
+| `D:\Push_to_talk\docs\task_list.md`                               | Persistent task tracking        |
+| `D:\Push_to_talk\docs\changelog.md`                               | Detailed history of changes     |
+| `D:\Push_to_talk\docs\changelog_summary.md`                       | Concise milestones              |
+| `D:\Push_to_talk\docs\session_handoff\2026-01-25_1843_handoff.md` | This handoff file               |
+
+## Key Reference Files
+| File                             | Why It Matters                   |
+| -------------------------------- | -------------------------------- |
+| `D:\Push_to_talk\pyproject.toml` | Dependency definition            |
+| `D:\Push_to_talk\README.md`      | Project overview and quick start |
+| `D:\Push_to_talk\main.py`        | Application entry point          |
+
+---
+
+## What Was Implemented
+- **Repository Initialization**: Cloned from `https://github.com/rob88pt/push-to-talk_custom.git` and flattened into `D:\Push_to_talk`.
+- **Environment Setup**: Installed `uv` package manager and ran `uv sync` to install dependencies.
+- **Verification**: Ran `pytest`, resulting in 231 passes and 1 skip.
+
+## Remaining Work
+- [ ] Implement custom refinement logic or other requested features.
+- [ ] Configure API keys for transcription/refinement services.
+
+## How to Run
+```powershell
+cd D:\Push_to_talk
+$env:PATH += ";C:\Users\Legion\.local\bin" # If uv is not in PATH
+uv run python main.py
+```
+
+## Dependencies Added
+- Standard project dependencies installed via `uv sync`.
