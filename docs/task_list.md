@@ -1,17 +1,16 @@
 # Task List
 
-## 🔴 Blocked
-- [ ] None
+## 📋 Backlog (To Do)
+- [ ] User verification of new Cerebras models in standalone EXE (added: 2026-01-26)
+- [ ] Investigate additional refinement providers (added: 2026-01-26)
 
 ## 🟡 In Progress
-- [/] Initial Setup & Verification
-
-## 📋 Backlog (To Do)
-- [ ] Implement custom refinement features
+- [/] Ready for user verification and follow-up tasks (updated: 2026-01-26)
 
 ## ✅ Done
-- [x] Clone repository (done: 2026-01-25)
-- [x] Move to D:\Push_to_talk and flatten structure (done: 2026-01-25)
-- [x] Install `uv` package manager (done: 2026-01-25)
-- [x] Install dependencies via `uv sync` (done: 2026-01-25)
-- [x] Verify setup with 231 passing tests (done: 2026-01-25)
+- [x] Session handoff and asset export (done: 2026-01-26)
+- [x] Research Cerebras available models (done: 2026-01-26)
+- [x] Implement Cerebras model additions including GPT OSS (done: 2026-01-26)
+- [x] Verify changes with pytest (done: 2026-01-26)
+- [x] Build standalone Windows executable (done: 2026-01-26)
+- [x] Finalize implementation plan and walkthrough (done: 2026-01-26)

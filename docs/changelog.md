@@ -1,24 +1,22 @@
 # Changelog
 
-## [2026-01-25] - Project Initialization & Environment Setup
+## [2026-01-26] - Cerebras Model Expansion & Build
 
 ### Added
-- Forked repository cloned to `D:\Push_to_talk`.
-- Project memory system initialized in `docs/` (`active_context.md`, `task_list.md`, `changelog.md`).
-- Session tracking initialized in `docs/previous_chat_exports_archive/`.
+- Added `gpt-oss-120b` (GPT OSS), `llama-3.1-8b`, `qwen-3-235b-instruct`, and `z-ai-glm-4.7` to the Cerebras refinement provider model list.
+- Standalone Windows executable and zip archive built in `dist/`.
 
 ### Changed
-- Flattened repository structure to reside directly in `D:\Push_to_talk`.
+- Updated `src/gui/api_section.py` to expose the new models in the configuration GUI.
 
-### Fixed
-- Missing `uv` command: Installed `uv` package manager to `C:\Users\Legion\.local\bin`.
+### Verified
+- Ran `pytest tests/test_text_refiner_factory.py tests/test_config_gui.py` - All tests passed.
+- Successfully executed `.\build_script\build.bat` to generate the production executable.
 
 ### Decisions
-- Using `uv` for package management as per the original project's `pyproject.toml`.
-- Maintaining project memory in `docs/` for cross-session continuity.
+- Included both production and preview models for Cerebras to provide users with more options before upcoming deprecations.
 
 ### Files Affected
-- `D:\Push_to_talk\` - entire repository contents moved here.
-- `D:\Push_to_talk\docs\active_context.md` - created.
-- `D:\Push_to_talk\docs\task_list.md` - created.
-- `D:\Push_to_talk\docs\changelog.md` - created.
+- `src/gui/api_section.py` - Updated `cerebras_models` list in multiple methods.
+- `dist/PushToTalk.exe` - New standalone executable.
+- `dist/PushToTalk.zip` - New zip archive.

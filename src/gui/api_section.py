@@ -340,9 +340,13 @@ class APISection:
             "gpt-4o",
         ]
         cerebras_models = [
+            "gpt-oss-120b",
             "llama-3.3-70b",
+            "llama-3.1-8b",
             "qwen-3-235b-a22b-instruct-2507",
+            "qwen-3-235b-instruct",
             "qwen-3-32b",
+            "z-ai-glm-4.7",
             "llama3.1-8b",
         ]
 
@@ -473,9 +477,13 @@ class APISection:
                 ]
             elif provider == "cerebras":
                 models = [
+                    "gpt-oss-120b",
                     "llama-3.3-70b",
+                    "llama-3.1-8b",
                     "qwen-3-235b-a22b-instruct-2507",
+                    "qwen-3-235b-instruct",
                     "qwen-3-32b",
+                    "z-ai-glm-4.7",
                     "llama3.1-8b",
                 ]
             else:

@@ -1,12 +1,13 @@
 # Changelog Summary
 
 ## Major Milestones
-- **2026-01-25** Successfully initialized `push-to-talk_custom`, installed dependencies, and verified with 231 passing tests.
+- **2026-01-26** Expanded Cerebras models (including GPT OSS) and built standalone Windows executable.
+- **2026-01-25** Initial project setup and environment verification.
 
 ## Key Decisions
 - Standardized on `uv` for environment management.
-- Repository localized to `D:\Push_to_talk`.
+- Proactively added new Cerebras models to handle upcoming API deprecations.
 
 ## Current State
-- All core dependencies installed and tests passing.
-- Ready for custom feature implementation.
+- Cerebras model expansion implemented and verified.
+- Production-ready executable available in `dist/`.
