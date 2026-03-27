@@ -2,10 +2,11 @@ import os
 from loguru import logger
 import time
 from typing import Optional
-from openai import OpenAI
+from openai import OpenAI, APIError as OpenAIAPIError
 
 from src.transcription_base import TranscriberBase
 from src.utils import validate_audio_file_exists, validate_audio_duration
+from src.exceptions import TranscriptionError, APIError
 
 
 class OpenAITranscriber(TranscriberBase):
@@ -48,17 +49,10 @@ class OpenAITranscriber(TranscriberBase):
             start_time = time.time()
             logger.debug(f"Starting transcription for: {audio_file_path}")
 
-            # Prepare prompt for context (language hint + glossary)
-            prompt_parts = []
-            if language:
-                prompt_parts.append(f"Transcription language: {language}")
+            # Build optional prompt from glossary terms
+            prompt = ", ".join(self.glossary) if self.glossary else None
 
-            if self.glossary:
-                prompt_parts.append(f"Glossary: {', '.join(self.glossary)}")
-
-            prompt = ". ".join(prompt_parts) if prompt_parts else None
-
-            logger.info(f"Calling OpenAI transcription API (model: {self.model}, language: {language}, prompt length: {len(prompt) if prompt else 0})")
+            logger.info(f"Calling OpenAI transcription API (model: {self.model}, language: {language})")
 
             with open(audio_file_path, "rb") as audio_file:
                 response = self.client.audio.transcriptions.create(
@@ -95,6 +89,13 @@ class OpenAITranscriber(TranscriberBase):
             )
             return transcribed_text if transcribed_text else None
 
+        except OpenAIAPIError as e:
+            logger.error(f"OpenAI API error during transcription: {e}")
+            raise APIError(
+                f"OpenAI transcription API failed: {e}",
+                provider="OpenAI",
+                status_code=getattr(e, "status_code", None),
+            ) from e
         except Exception as e:
-            logger.error(f"OpenAI transcription error: {str(e)}")
-            return None
+            logger.error(f"Transcription failed: {e}")
+            raise TranscriptionError(f"Failed to transcribe audio: {e}") from e
