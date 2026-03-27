@@ -151,7 +151,7 @@ class ConfigurationWindow:
 
     def _create_welcome_section(self, parent: ttk.Widget):
         """Create welcome message section at the top."""
-        frame = ttk.LabelFrame(parent, text="Welcome to PushToTalk", padding=15)
+        frame = ttk.LabelFrame(parent, text="Welcome to PushToTalk v1.2", padding=15)
         frame.pack(fill="x", pady=(0, 15))
 
         # Main welcome text
@@ -241,6 +241,7 @@ Configure your settings below, then click "Start Application" to begin:"""
                         self.api_section.stt_model_var,
                         self.api_section.refinement_provider_var,
                         self.api_section.refinement_model_var,
+                        self.api_section.language_var,
                     ]
                 )
             if self.audio_section:
@@ -352,6 +353,7 @@ Configure your settings below, then click "Start Application" to begin:"""
             stt_model=api_values["stt_model"],
             refinement_provider=api_values["refinement_provider"],
             refinement_model=api_values["refinement_model"],
+            language=api_values["language"],
             sample_rate=audio_values["sample_rate"],
             chunk_size=audio_values["chunk_size"],
             channels=audio_values["channels"],
@@ -377,6 +379,7 @@ Configure your settings below, then click "Start Application" to begin:"""
                 config.stt_model,
                 config.refinement_provider,
                 config.refinement_model,
+                config.language,
             )
             self.audio_section.set_values(
                 config.sample_rate, config.chunk_size, config.channels

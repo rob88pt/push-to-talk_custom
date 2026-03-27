@@ -7,7 +7,7 @@
 
 ![Python Version](https://img.shields.io/badge/python-3.12+-blue.svg)
 ![License](https://img.shields.io/github/license/yixin0829/push-to-talk)
-![Version](https://img.shields.io/github/v/release/yixin0829/push-to-talk)
+![Version](https://img.shields.io/badge/version-1.2.0-blue)
 ![Platform](https://img.shields.io/badge/platform-windows-lightgrey)
 [![codecov](https://codecov.io/gh/yixin0829/push-to-talk/graph/badge.svg?token=ZXD777GTHS)](https://codecov.io/gh/yixin0829/push-to-talk)
 ![GitHub Issues](https://img.shields.io/github/issues/yixin0829/push-to-talk)
@@ -22,12 +22,12 @@ A Python application that provides push-to-talk speech-to-text functionality wit
 
 **Compared to Wispr Flow ($14.40/month) and Superwhisper ($8.49/month), PushToTalk delivers:**
 
-| Feature | PushToTalk | Others |
-|---------|-----------|--------|
-| **Cost** | **FREE** + pay-as-you-go API | $102-216/year subscription |
-| **STT Speed** | **Ultra-fast** (Deepgram Nova-3 and Cerebras) | Standard latency |
-| **Customization** | Multi-provider choice, custom glossary, custom prompts | Limited vendor lock-in |
-| **Privacy** | Full inference provider control, choose your API including Ollama | Proprietary ecosystem |
+| Feature           | PushToTalk                                                        | Others                     |
+| ----------------- | ----------------------------------------------------------------- | -------------------------- |
+| **Cost**          | **FREE** + pay-as-you-go API                                      | $102-216/year subscription |
+| **STT Speed**     | **Ultra-fast** (Deepgram Nova-3 and Cerebras)                     | Standard latency           |
+| **Customization** | Multi-provider choice, custom glossary, custom prompts            | Limited vendor lock-in     |
+| **Privacy**       | Full inference provider control, choose your API including Ollama | Proprietary ecosystem      |
 
 **For power users, developers, and privacy-conscious teams: PushToTalk is the most customizable, fastest, and nearly free alternative to existing AI dictation tools.**
 
@@ -42,6 +42,8 @@ A Python application that provides push-to-talk speech-to-text functionality wit
 - **📝 Auto Text Insertion**: Automatically inserts refined text into the active window
 
 ## Release Demos
+- v1.2.0: Critical fixes for Deepgram SDK compatibility and OpenAI error handling.
+- v1.1.0: Added transcription language selector and OpenAI transcription enhancements.
 - v0.5.0: https://app.canvid.com/share/fi_01KDGEDBA86537CP18E9XDDJY8
 - v0.3.0 - v0.4.0: https://www.loom.com/share/71ecc05d4bb440ecb708d980505b9000
 - v0.2.0: https://www.loom.com/share/fbabb2da83c249d3a0a09b3adcc4a4e6
@@ -246,26 +248,26 @@ The application creates a `push_to_talk_config.json` file. Example configuration
 
 #### Configuration Parameters
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `stt_provider` | string | `"deepgram"` | Speech-to-text provider. Options: `openai`, `deepgram`. Determines which transcription service to use. |
-| `openai_api_key` | string | `""` | Your OpenAI API key for Whisper services. Required when using OpenAI provider. Can be set via GUI, config file, or `OPENAI_API_KEY` environment variable. |
-| `deepgram_api_key` | string | `""` | Your Deepgram API key for transcription services. Required when using Deepgram provider. Can be set via GUI, config file, or `DEEPGRAM_API_KEY` environment variable. |
-| `stt_model` | string | `"nova-3"` | STT Model for speech-to-text. For OpenAI: `whisper-1`, `gpt-4o-transcribe`, `gpt-4o-mini-transcribe`. For Deepgram: `nova-3`, `nova-2`, `base`, `enhanced`, `whisper-medium`. |
-| `refinement_provider` | string | `"cerebras"` | Text refinement provider. Options: `openai`, `cerebras`. Determines which AI service refines transcribed text. |
-| `refinement_model` | string | `"llama-3.3-70b"` | Refinement Model for text refinement. For OpenAI: `gpt-4.1-nano`, `gpt-4o-mini`, `gpt-4o`. For Cerebras: `llama-3.3-70b`, `llama-3.1-70b`, and other Cerebras-supported models. |
-| `cerebras_api_key` | string | `""` | Your Cerebras API key for text refinement. Required when using Cerebras provider. Can be set via GUI, config file, or `CEREBRAS_API_KEY` environment variable. |
-| `sample_rate` | integer | `16000` | Audio sampling frequency in Hz. 16kHz is optimal for speech recognition. |
-| `chunk_size` | integer | `1024` | Audio buffer size in samples. Determines how much audio is read at once (affects latency vs performance). |
-| `channels` | integer | `1` | Number of audio channels. Use `1` for mono recording (recommended for speech). |
-| `hotkey` | string | `"ctrl+shift+^"` | Hotkey combination for push-to-talk. Platform-aware defaults: Windows/Linux `ctrl+shift+^`, macOS `cmd+shift+space`. See [Hotkey Options](#hotkey-options) for examples. |
-| `toggle_hotkey` | string | `"ctrl+shift+space"` | Hotkey combination for toggle recording mode. Press once to start, press again to stop. Platform-aware defaults: Windows/Linux `ctrl+shift+space`, macOS `cmd+shift+^`. |
-| `enable_text_refinement` | boolean | `true` | Whether to refine transcribed text using AI. Disable for faster processing without refinement. |
-| `enable_logging` | boolean | `true` | Whether to enable detailed logging to `push_to_talk.log` file using loguru. |
-| `enable_audio_feedback` | boolean | `true` | Whether to play audio cues when starting/stopping recording. Provides immediate feedback for hotkey interactions. |
-| `debug_mode` | boolean | `false` | Whether to enable debug mode. When enabled, recorded audio files are saved to timestamped debug directories (e.g., `debug_audio_20231215_143022_456/`) with recording metadata for troubleshooting. |
-| `custom_glossary` | array | `[]` | List of domain-specific terms, acronyms, and proper names to improve transcription accuracy. Terms are automatically included in text refinement prompts. |
-| `custom_refinement_prompt` | string | `""` | Custom system prompt for text refinement. Leave empty to use default prompts. Use `{custom_glossary}` placeholder to include glossary terms dynamically. |
+| Parameter                  | Type    | Default              | Description                                                                                                                                                                                         |
+| -------------------------- | ------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `stt_provider`             | string  | `"deepgram"`         | Speech-to-text provider. Options: `openai`, `deepgram`. Determines which transcription service to use.                                                                                              |
+| `openai_api_key`           | string  | `""`                 | Your OpenAI API key for Whisper services. Required when using OpenAI provider. Can be set via GUI, config file, or `OPENAI_API_KEY` environment variable.                                           |
+| `deepgram_api_key`         | string  | `""`                 | Your Deepgram API key for transcription services. Required when using Deepgram provider. Can be set via GUI, config file, or `DEEPGRAM_API_KEY` environment variable.                               |
+| `stt_model`                | string  | `"nova-3"`           | STT Model for speech-to-text. For OpenAI: `whisper-1`, `gpt-4o-transcribe`, `gpt-4o-mini-transcribe`. For Deepgram: `nova-3`, `nova-2`, `base`, `enhanced`, `whisper-medium`.                       |
+| `refinement_provider`      | string  | `"cerebras"`         | Text refinement provider. Options: `openai`, `cerebras`. Determines which AI service refines transcribed text.                                                                                      |
+| `refinement_model`         | string  | `"llama-3.3-70b"`    | Refinement Model for text refinement. For OpenAI: `gpt-4.1-nano`, `gpt-4o-mini`, `gpt-4o`. For Cerebras: `llama-3.3-70b`, `llama-3.1-70b`, and other Cerebras-supported models.                     |
+| `cerebras_api_key`         | string  | `""`                 | Your Cerebras API key for text refinement. Required when using Cerebras provider. Can be set via GUI, config file, or `CEREBRAS_API_KEY` environment variable.                                      |
+| `sample_rate`              | integer | `16000`              | Audio sampling frequency in Hz. 16kHz is optimal for speech recognition.                                                                                                                            |
+| `chunk_size`               | integer | `1024`               | Audio buffer size in samples. Determines how much audio is read at once (affects latency vs performance).                                                                                           |
+| `channels`                 | integer | `1`                  | Number of audio channels. Use `1` for mono recording (recommended for speech).                                                                                                                      |
+| `hotkey`                   | string  | `"ctrl+shift+^"`     | Hotkey combination for push-to-talk. Platform-aware defaults: Windows/Linux `ctrl+shift+^`, macOS `cmd+shift+space`. See [Hotkey Options](#hotkey-options) for examples.                            |
+| `toggle_hotkey`            | string  | `"ctrl+shift+space"` | Hotkey combination for toggle recording mode. Press once to start, press again to stop. Platform-aware defaults: Windows/Linux `ctrl+shift+space`, macOS `cmd+shift+^`.                             |
+| `enable_text_refinement`   | boolean | `true`               | Whether to refine transcribed text using AI. Disable for faster processing without refinement.                                                                                                      |
+| `enable_logging`           | boolean | `true`               | Whether to enable detailed logging to `push_to_talk.log` file using loguru.                                                                                                                         |
+| `enable_audio_feedback`    | boolean | `true`               | Whether to play audio cues when starting/stopping recording. Provides immediate feedback for hotkey interactions.                                                                                   |
+| `debug_mode`               | boolean | `false`              | Whether to enable debug mode. When enabled, recorded audio files are saved to timestamped debug directories (e.g., `debug_audio_20231215_143022_456/`) with recording metadata for troubleshooting. |
+| `custom_glossary`          | array   | `[]`                 | List of domain-specific terms, acronyms, and proper names to improve transcription accuracy. Terms are automatically included in text refinement prompts.                                           |
+| `custom_refinement_prompt` | string  | `""`                 | Custom system prompt for text refinement. Leave empty to use default prompts. Use `{custom_glossary}` placeholder to include glossary terms dynamically.                                            |
 
 #### Audio Quality Settings
 

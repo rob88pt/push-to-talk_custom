@@ -59,59 +59,55 @@ class DeepgramTranscriber(TranscriberBase):
                 audio_data = audio_file.read()
 
             # Build transcription options
-            options = {
+            options_dict = {
                 "model": self.model,
                 "smart_format": True,  # Enable smart formatting for better readability
             }
 
             # Add language if specified
             if language:
-                options["language"] = language
+                options_dict["language"] = language
 
             # Add keyterm prompting if glossary is provided and model supports it
             if self.glossary and self.model in ["nova-3"]:
                 # Prepare keyterms, limiting total character count to stay under token limit
                 keyterms = self._prepare_keyterms(self.glossary)
                 if keyterms:
-                    options["keyterm"] = keyterms
+                    options_dict["keyterm"] = keyterms
                     logger.debug(f"Using {len(keyterms)} keyterms for transcription")
             else:
                 logger.debug(
                     "No keyterms provided or model not supported. Only support nova-3 model for keyterms."
                 )
 
-            # Call Deepgram API
+            logger.info(f"Calling Deepgram transcription API (model: {self.model}, language: {language}, keyterm count: {len(self.glossary) if self.glossary else 0})")
+            logger.debug(f"Deepgram options: {options_dict}")
+
+            # Call Deepgram API (v5.x SDK structure)
             response = self.client.listen.v1.media.transcribe_file(
-                request=audio_data, **options
+                request=audio_data, **options_dict
             )
 
-            # Extract transcript from response
-            # Deepgram response structure: response.results.channels[0].alternatives[0].transcript
-            if (
-                hasattr(response, "results")
-                and hasattr(response.results, "channels")
-                and len(response.results.channels) > 0
-            ):
-                channel = response.results.channels[0]
-                if hasattr(channel, "alternatives") and len(channel.alternatives) > 0:
-                    transcribed_text = channel.alternatives[0].transcript
-                else:
-                    logger.warning("No alternatives found in Deepgram response")
-                    return None
-            else:
-                logger.warning("Invalid Deepgram response structure")
+            logger.debug(f"Deepgram response: {response}")
+
+            # Access transcript from the Pydantic models in v5.x SDK
+            try:
+                transcribed_text = response.results.channels[0].alternatives[0].transcript
+            except (AttributeError, IndexError) as e:
+                logger.warning(f"Could not extract transcript from Deepgram response: {e}")
                 return None
-
-            transcribed_text = transcribed_text.strip()
-            transcription_time = time.time() - start_time
-
-            logger.info(
-                f"Transcription successful: {len(transcribed_text)} characters in {transcription_time:.2f}s"
-            )
-            return transcribed_text if transcribed_text else None
+            
+            if not transcribed_text or not transcribed_text.strip():
+                logger.warning("Deepgram transcription returned empty transcript")
+                return None
+            
+            duration = time.time() - start_time
+            logger.info(f"Transcription successful: {len(transcribed_text)} characters in {duration:.2f}s")
+                
+            return transcribed_text.strip()
 
         except Exception as e:
-            logger.error(f"Transcription failed: {e}")
+            logger.error(f"Deepgram transcription error: {str(e)}")
             return None
 
     def _prepare_keyterms(self, glossary: List[str]) -> List[str]:

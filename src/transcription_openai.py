@@ -48,13 +48,32 @@ class OpenAITranscriber(TranscriberBase):
             start_time = time.time()
             logger.debug(f"Starting transcription for: {audio_file_path}")
 
+            # Prepare prompt for context (language hint + glossary)
+            prompt_parts = []
+            if language:
+                prompt_parts.append(f"Transcription language: {language}")
+
+            if self.glossary:
+                prompt_parts.append(f"Glossary: {', '.join(self.glossary)}")
+
+            prompt = ". ".join(prompt_parts) if prompt_parts else None
+
+            logger.info(f"Calling OpenAI transcription API (model: {self.model}, language: {language}, prompt length: {len(prompt) if prompt else 0})")
+
             with open(audio_file_path, "rb") as audio_file:
                 response = self.client.audio.transcriptions.create(
                     model=self.model,
                     file=audio_file,
                     language=language,
+                    prompt=prompt,
                     response_format="text",
                 )
+
+            if not response or not str(response).strip():
+                logger.error("OpenAI transcription API returned empty response")
+                return None
+
+            logger.debug(f"OpenAI transcription response: {response}")
 
             # Handle both string and object responses
             if hasattr(response, "text"):
@@ -77,5 +96,5 @@ class OpenAITranscriber(TranscriberBase):
             return transcribed_text if transcribed_text else None
 
         except Exception as e:
-            logger.error(f"Transcription failed: {e}")
+            logger.error(f"OpenAI transcription error: {str(e)}")
             return None

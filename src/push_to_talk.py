@@ -42,6 +42,9 @@ class PushToTalkConfig(BaseModel):
     openai_api_key: str = Field(default="", description="OpenAI API key")
     deepgram_api_key: str = Field(default="", description="Deepgram API key")
     stt_model: str = Field(default="nova-3", description="STT model name")
+    language: str = Field(
+        default="auto", description="Transcription language (e.g., 'en', 'es', 'auto')"
+    )
 
     # Text refinement settings
     refinement_provider: str = Field(
@@ -573,9 +576,25 @@ class PushToTalkApp:
                 logger.info(f"Target window: {window_title}")
 
             # Transcribe audio
-            logger.info("Transcribing audio...")
-            transcribed_text = self.transcriber.transcribe_audio(audio_file)
-            logger.info(f"Transcribed text: {transcribed_text}")
+            if not os.path.exists(audio_file):
+                logger.error(f"Audio file not found: {audio_file}")
+                return
+
+            file_size = os.path.getsize(audio_file)
+            logger.info(f"Processing recorded audio: {audio_file} ({file_size} bytes)")
+
+            # Get language from config
+            lang = None if self.config.language == "auto" else self.config.language
+            logger.info(f"Transcribing audio with provider '{self.config.stt_provider}' (language: {lang}, model: {self.config.stt_model})...")
+            try:
+                transcribed_text = self.transcriber.transcribe_audio(audio_file, language=lang)
+                if transcribed_text:
+                    logger.info(f"Successfully transcribed audio: '{transcribed_text[:50]}...'")
+                else:
+                    logger.warning("Transcription returned empty text or None")
+            except Exception as e:
+                logger.exception(f"Transcription failed with error: {str(e)}")
+                transcribed_text = None
 
             # Clean up temporary audio file
             try:

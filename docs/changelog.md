@@ -1,22 +1,51 @@
 # Changelog
 
-## [2026-01-26] - Cerebras Model Expansion & Build
+## [2026-01-27] - Release v1.2.0: Deepgram SDK Fix & OpenAI Consistency
 
-### Added
-- Added `gpt-oss-120b` (GPT OSS), `llama-3.1-8b`, `qwen-3-235b-instruct`, and `z-ai-glm-4.7` to the Cerebras refinement provider model list.
-- Standalone Windows executable and zip archive built in `dist/`.
+### Fixed
+- **Deepgram Transcription API**: Resolved `AttributeError: 'ListenClient' object has no attribute 'rest'` by updating to the Deepgram SDK v5.x asynchronous-compatible structure.
+- **OpenAI Transcription Robustness**: Fixed a bug where transcription errors would re-raise exceptions instead of returning `None`, ensuring the app processing pipeline remains stable.
+- **Transcriber Contract**: Standardized all transcription providers to return `None` on error, ensuring consistent behavior across services.
+- **Integration Test Regressions**: Updated `StubTranscriber` in tests to correctly handle the new `language` argument.
 
 ### Changed
-- Updated `src/gui/api_section.py` to expose the new models in the configuration GUI.
+- **Branding**: Updated internal versioning to v1.2 across GUI and configuration.
 
 ### Verified
-- Ran `pytest tests/test_text_refiner_factory.py tests/test_config_gui.py` - All tests passed.
-- Successfully executed `.\build_script\build.bat` to generate the production executable.
+- Passed all 220 unit and integration tests.
+- Verified Deepgram Nova-3 transcription with the new SDK structure.
+- Verified OpenAI graceful failure handling.
+- Confirmed build process for versioned executable.
+
+## [2026-01-26] - Release v1.1.0: Language Selector & OpenAI Enhancements
+
+### Fixed
+- **Deepgram Transcription Error**: Fixed a critical syntax error in `src/transcription_deepgram.py` where `options` was being reassigned to `options_dict` incorrectly.
+
+### Added
+- **Enhanced Debug Logging**: Added verbose logging across the transcription pipeline to facilitate easier troubleshooting of API calls and audio processing steps.
+- **Transcription Language Selector**: Users can now choose a specific transcription language in the GUI settings (supports English, Spanish, French, etc., and auto-detection).
+- **OpenAI Transcription Hints**: Added language hints to the OpenAI transcription prompt to improve consistency and accuracy.
+- **OpenAI Glossary Support**: Fixed missing glossary integration in the OpenAI transcription pipeline.
+- **Versioned Executable Build**: The build process now generates versioned files: `PushToTalk_v1.1.exe` and `PushToTalk_v1.1.zip`.
+
+### Changed
+- **Branding**: Updated internal versioning in `pyproject.toml` and GUI welcome section to v1.1.
+- **PyInstaller Spec**: Updated `push_to_talk.spec` to output versioned binary filenames.
+
+### Verified
+- Ran `pytest tests/test_transcription_openai.py` - 17 passed.
+- Successfully verified the new versioned build in the `dist/` directory.
 
 ### Decisions
-- Included both production and preview models for Cerebras to provide users with more options before upcoming deprecations.
+- Moving to versioned executable names (`_v1.1`) to help users manage multiple versions of the tool.
 
 ### Files Affected
-- `src/gui/api_section.py` - Updated `cerebras_models` list in multiple methods.
-- `dist/PushToTalk.exe` - New standalone executable.
-- `dist/PushToTalk.zip` - New zip archive.
+- `src/push_to_talk.py` - Core config and processing logic.
+- `src/transcription_openai.py` - OpenAI transcription enhancements.
+- `src/gui/api_section.py` - Language selector GUI.
+- `src/gui/configuration_window.py` - Branding and variable wiring.
+- `pyproject.toml` - Version update.
+- `README.md` - Documentation and badge updates.
+- `build_script/push_to_talk.spec` - Build output naming.
+- `build_script/build.bat` - Cleanup and compression updates.

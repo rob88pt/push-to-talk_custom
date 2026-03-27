@@ -39,6 +39,7 @@ class APISection:
         self.stt_model_var = tk.StringVar()
         self.refinement_provider_var = tk.StringVar()
         self.refinement_model_var = tk.StringVar()
+        self.language_var = tk.StringVar()
 
         # Provider-specific widgets
         self.openai_widgets = {}
@@ -245,6 +246,33 @@ class APISection:
             "<<ComboboxSelected>>", self._on_refinement_model_changed
         )
 
+        # Transcription Language
+        ttk.Label(self.frame, text="Transcription Language:").grid(
+            row=4, column=0, sticky="w", pady=2
+        )
+        self.language_combo = ttk.Combobox(
+            self.frame,
+            textvariable=self.language_var,
+            values=[
+                "auto",
+                "en",
+                "es",
+                "fr",
+                "de",
+                "it",
+                "pt",
+                "nl",
+                "ja",
+                "ko",
+                "zh",
+                "ru",
+                "hi",
+            ],
+            state="readonly",
+            width=20,
+        )
+        self.language_combo.grid(row=4, column=1, sticky="w", padx=(10, 0), pady=2)
+
         self.frame.columnconfigure(1, weight=1)
 
     def _on_provider_changed(self, event=None):
@@ -391,6 +419,7 @@ class APISection:
             "stt_model": self.stt_model_var.get(),
             "refinement_provider": self.refinement_provider_var.get(),
             "refinement_model": self.refinement_model_var.get(),
+            "language": self.language_var.get(),
         }
 
     def set_values(
@@ -402,6 +431,7 @@ class APISection:
         stt_model: str,
         refinement_provider: str,
         refinement_model: str,
+        language: str = "auto",
     ):
         """
         Set the API configuration values.
@@ -447,6 +477,7 @@ class APISection:
         # This must happen AFTER the combobox options are updated
         self.stt_model_var.set(stt_model)
         self.refinement_model_var.set(refinement_model)
+        self.language_var.set(language)
 
     def _update_combobox_options_only(self):
         """Update combobox dropdown options without changing selected values."""
@@ -571,6 +602,7 @@ class APISection:
         status_lines.append(f"  STT Model: {values['stt_model']}")
         status_lines.append(f"  Refinement Provider: {values['refinement_provider']}")
         status_lines.append(f"  Refinement Model: {values['refinement_model']}")
+        status_lines.append(f"  Language: {values['language']}")
 
         # Add warning if selected providers are not valid
         if values["stt_provider"] == "openai" and openai_prefix == "[X]":

@@ -3,29 +3,29 @@ echo Building PushToTalk GUI Windows Executable...
 echo.
 
 REM Clean previous .exe and .zip files
-if exist "dist\PushToTalk.exe" del /f /q "dist\PushToTalk.exe"
-if exist "dist\PushToTalk.zip" del /f /q "dist\PushToTalk.zip"
+if exist "dist\PushToTalk_v1.2.exe" del /f /q "dist\PushToTalk_v1.2.exe"
+if exist "dist\PushToTalk_v1.2.zip" del /f /q "dist\PushToTalk_v1.2.zip"
 
 REM Build the executable
 echo Building GUI application with PyInstaller...
 uv run pyinstaller build_script/push_to_talk.spec
 
 REM Check if build was successful
-if exist "dist\PushToTalk.exe" (
+if exist "dist\PushToTalk_v1.2.exe" (
     echo.
     echo ========================================
     echo Build successful!
-    echo GUI Executable created: dist\PushToTalk.exe
+    echo GUI Executable created: dist\PushToTalk_v1.2.exe
     echo ========================================
     echo.
     REM Compress the executable to a zip file for easy distribution
-    echo Compressing executable to PushToTalk.zip...
-    powershell -Command "Compress-Archive -Path dist\PushToTalk.exe -DestinationPath dist\PushToTalk.zip"
-    echo Executable compressed to PushToTalk.zip
+    echo Compressing executable to PushToTalk_v1.2.zip...
+    powershell -Command "Compress-Archive -Path dist\PushToTalk_v1.2.exe -DestinationPath dist\PushToTalk_v1.2.zip"
+    echo Executable compressed to PushToTalk_v1.2.zip
     echo.
 
     echo To run the GUI application:
-    echo 1. Double-click dist\PushToTalk.exe
+    echo 1. Double-click dist\PushToTalk_v1.2.exe
     echo 2. Configure your OpenAI API key in the setup window
     echo 3. Adjust audio and hotkey settings as needed
     echo 4. Click "Start Application" to begin

@@ -62,7 +62,7 @@ def dependency_stubs(monkeypatch):
             self.glossary = []
             tracker["transcriber"].append(self)
 
-        def transcribe_audio(self, audio_path):
+        def transcribe_audio(self, audio_path, language=None):
             self.last_path = audio_path
             return self.result
 
