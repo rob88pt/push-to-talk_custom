@@ -1,3 +1,4 @@
+import subprocess
 import time
 from loguru import logger
 import sys
@@ -11,6 +12,13 @@ from src.config.constants import (
     TEXT_INSERTION_DELAY_AFTER_PASTE_SECONDS,
 )
 from src.exceptions import TextInsertionError
+
+TERMINAL_WM_CLASSES = {
+    "Gnome-terminal", "mate-terminal", "xfce4-terminal", "terminator", "tilix",
+    "kitty", "Alacritty", "st-256color", "URxvt", "XTerm", "konsole",
+    "lxterminal", "sakura", "guake", "Tilda", "cool-retro-term", "wezterm-gui",
+    "foot", "rio", "ghostty", "dev.warp.Warp",
+}
 
 
 class TextInserter:
@@ -54,15 +62,24 @@ class TextInserter:
 
             time.sleep(TEXT_INSERTION_DELAY_AFTER_COPY_SECONDS)
 
-            # Use platform-specific modifier key for paste
-            modifier_key = (
-                keyboard.Key.cmd if sys.platform == "darwin" else keyboard.Key.ctrl
-            )
-
-            # Press modifier+v to paste
-            with self.keyboard.pressed(modifier_key):
-                self.keyboard.press("v")
-                self.keyboard.release("v")
+            if sys.platform == "darwin":
+                # macOS: use pynput with Cmd+V
+                with self.keyboard.pressed(keyboard.Key.cmd):
+                    self.keyboard.press("v")
+                    self.keyboard.release("v")
+            elif sys.platform == "linux":
+                # Linux: use xdotool (more reliable across terminals)
+                paste_key = "ctrl+shift+v" if self._is_active_window_terminal() else "ctrl+v"
+                subprocess.Popen(
+                    ["xdotool", "key", "--delay", "50", paste_key],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+            else:
+                # Windows: use pynput with Ctrl+V
+                with self.keyboard.pressed(keyboard.Key.ctrl):
+                    self.keyboard.press("v")
+                    self.keyboard.release("v")
 
             time.sleep(TEXT_INSERTION_DELAY_AFTER_PASTE_SECONDS)
 
@@ -89,6 +106,25 @@ class TextInserter:
     def _set_clipboard_text(self, text: str) -> None:
         """Set clipboard text content."""
         pyperclip.copy(text)
+
+    @staticmethod
+    def _is_active_window_terminal() -> bool:
+        """Detect if the active window is a terminal using xprop WM_CLASS."""
+        try:
+            window_id = subprocess.check_output(
+                ["xdotool", "getactivewindow"], stderr=subprocess.DEVNULL, timeout=1
+            ).strip()
+            wm_class_output = subprocess.check_output(
+                ["xprop", "-id", window_id, "WM_CLASS"], stderr=subprocess.DEVNULL, timeout=1
+            ).decode()
+            # Extract all WM_CLASS values
+            for part in wm_class_output.split('"'):
+                if part.strip() and part.strip() not in (",", "WM_CLASS(STRING) ="):
+                    if part in TERMINAL_WM_CLASSES:
+                        return True
+        except Exception:
+            pass
+        return False
 
     def get_active_window_title(self) -> Optional[str]:
         """

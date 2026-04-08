@@ -3,9 +3,9 @@ set -euo pipefail
 
 echo "Building PushToTalk Linux executable with PyInstaller..."
 
-# Ensure we're in the repo root (script directory)
+# Ensure we're in the repo root
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+cd "$SCRIPT_DIR/.."
 
 # Clean previous artifacts
 rm -f "dist/PushToTalk" "dist/PushToTalk-linux.zip" || true
