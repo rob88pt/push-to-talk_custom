@@ -16,7 +16,7 @@ from src.exceptions import TextInsertionError
 TERMINAL_WM_CLASSES = {
     "Gnome-terminal", "mate-terminal", "xfce4-terminal", "terminator", "tilix",
     "kitty", "Alacritty", "st-256color", "URxvt", "XTerm", "konsole",
-    "lxterminal", "sakura", "guake", "Tilda", "cool-retro-term", "wezterm-gui",
+    "lxterminal", "sakura", "guake", "Tilda", "cool-retro-term", "org.wezfurlong.wezterm",
     "foot", "rio", "ghostty", "dev.warp.Warp",
 }
 

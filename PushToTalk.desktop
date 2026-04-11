@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Push To Talk
+Exec=/home/robert/Dev/My_Setup/push-to-talk_custom/dist/PushToTalk
+Path=/home/robert/Dev/My_Setup/push-to-talk_custom/dist
+Type=Application
+Terminal=false
+Icon=audio-input-microphone
+Categories=Utility;Audio;
