@@ -1,6 +1,8 @@
 import os
 import sys
 import time
+import concurrent.futures
+from threading import Thread as _RealThread
 from loguru import logger
 import threading
 import signal
@@ -25,6 +27,7 @@ from src.exceptions import (
     TextInsertionError,
     APIError,
 )
+from src.config.constants import TEXT_REFINEMENT_TIMEOUT_SECONDS
 
 
 def _get_default_hotkey() -> str:
@@ -670,6 +673,15 @@ class PushToTalkApp:
             except (TranscriptionError, APIError) as e:
                 logger.error(f"Transcription failed: {e}")
                 transcribed_text = None
+                try:
+                    import subprocess
+                    subprocess.Popen(
+                        ["notify-send", "-u", "critical", "-i", "dialog-error",
+                         "Push-to-Talk", f"Transcription failed: {e}"],
+                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                    )
+                except Exception:
+                    pass
 
             # Clean up temporary audio file
             try:
@@ -683,20 +695,33 @@ class PushToTalkApp:
                 logger.warning("Transcribed text is None, skipping refinement")
                 return
 
-            # Refine text if enabled (1-2 seconds, runs in background)
+            # Refine text if enabled, with a timeout fallback
             final_text = transcribed_text
             if self.text_refiner and self.config.enable_text_refinement:
                 logger.info("Refining transcribed text...")
-                try:
-                    refined_text = self.text_refiner.refine_text(transcribed_text)
-                    if refined_text:
-                        final_text = refined_text
-                        logger.info(f"Refined: {final_text}")
-                except (TextRefinementError, APIError) as e:
-                    logger.error(
-                        f"Text refinement failed, using original transcription: {e}"
+                _holder: list = [None, None]  # [result, exception]
+
+                def _do_refine() -> None:
+                    try:
+                        _holder[0] = self.text_refiner.refine_text(transcribed_text)
+                    except Exception as _exc:
+                        _holder[1] = _exc
+
+                _refine_thread = _RealThread(target=_do_refine, daemon=True)
+                _refine_thread.start()
+                _refine_thread.join(timeout=TEXT_REFINEMENT_TIMEOUT_SECONDS)
+                if _refine_thread.is_alive():
+                    logger.warning(
+                        f"Text refinement timed out after {TEXT_REFINEMENT_TIMEOUT_SECONDS}s, "
+                        "using original transcription"
                     )
-                    final_text = transcribed_text
+                elif _holder[1] is not None:
+                    logger.error(
+                        f"Text refinement failed, using original transcription: {_holder[1]}"
+                    )
+                elif _holder[0]:
+                    final_text = _holder[0]
+                    logger.info(f"Refined: {final_text}")
 
             # Insert text into active window
             logger.info("Inserting text into active window...")
