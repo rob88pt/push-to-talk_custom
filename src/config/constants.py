@@ -103,6 +103,13 @@ Rationale: Very short text (<20 characters) is typically not worth
 the API cost and latency of refinement. Return as-is instead.
 """
 
+TEXT_REFINEMENT_TIMEOUT_SECONDS = 5.0
+"""Maximum time (in seconds) to wait for text refinement before falling back to raw transcription.
+
+Rationale: LLM refinement occasionally stalls or takes 30+ seconds due to slow API responses.
+Rather than blocking insertion, we fall back to the unrefined transcription after this timeout.
+"""
+
 # Service Timeouts
 HOTKEY_SERVICE_THREAD_TIMEOUT_SECONDS = 5.0
 """Maximum time to wait for hotkey service thread to stop (in seconds).
