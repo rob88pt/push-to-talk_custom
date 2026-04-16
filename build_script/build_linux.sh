@@ -11,7 +11,7 @@ cd "$SCRIPT_DIR/.."
 rm -f "dist/PushToTalk" "dist/PushToTalk-linux.zip" || true
 
 # Build using PyInstaller (one-file, windowed)
-uv run pyinstaller \
+.venv/bin/python -m PyInstaller \
   --name PushToTalk \
   --onefile \
   --noconsole \

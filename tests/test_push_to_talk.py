@@ -691,3 +691,76 @@ def test_update_configuration_uses_requires_reinitialization(
     assert dependency_stubs.last("audio_recorder") is current_recorder
     assert current_service.stop_service_calls == 0  # No additional stops
     assert app.config == non_critical_config
+
+
+class TestRefinementTimeout:
+    """Tests for the 5-second timeout on the text refinement step."""
+
+    def _make_wav(self, path):
+        """Write a minimal valid WAV file so os.path.getsize returns > 0."""
+        import wave, struct
+        with wave.open(str(path), "w") as wf:
+            wf.setnchannels(1)
+            wf.setsampwidth(2)
+            wf.setframerate(16000)
+            # Write 100ms of silence
+            frames = struct.pack("<" + "h" * 1600, *([0] * 1600))
+            wf.writeframes(frames)
+
+    def test_refinement_within_timeout_uses_refined_text(
+        self, make_app, dependency_stubs, tmp_path
+    ):
+        """When refinement completes quickly, the refined text is inserted."""
+        app = make_app()
+
+        transcriber = dependency_stubs.last("transcriber")
+        refiner = dependency_stubs.last("text_refiner")
+        inserter = dependency_stubs.last("text_inserter")
+
+        audio_path = tmp_path / "audio.wav"
+        self._make_wav(audio_path)
+
+        transcriber.result = "raw transcription"
+        refiner.result = "refined text"
+
+        # Call _process_audio_background directly (no threading needed)
+        app._process_audio_background(str(audio_path))
+
+        assert inserter.last_text == "refined text"
+
+    def test_refinement_exceeding_timeout_uses_raw_transcription(
+        self, make_app, dependency_stubs, monkeypatch, tmp_path
+    ):
+        """When refinement takes longer than the timeout, raw transcription is used.
+
+        The test itself must finish in well under 10s to prove the timeout
+        fires at ~5s rather than waiting the full 10s sleep.
+        """
+        import time
+
+        app = make_app()
+
+        transcriber = dependency_stubs.last("transcriber")
+        refiner = dependency_stubs.last("text_refiner")
+        inserter = dependency_stubs.last("text_inserter")
+
+        audio_path = tmp_path / "audio.wav"
+        self._make_wav(audio_path)
+
+        transcriber.result = "raw transcription"
+
+        # Make refinement block for 10 seconds (well beyond the 5s timeout)
+        def slow_refine(text):
+            time.sleep(10)
+            return "refined text"
+
+        refiner.refine_text = slow_refine
+
+        start = time.monotonic()
+        app._process_audio_background(str(audio_path))
+        elapsed = time.monotonic() - start
+
+        # Should have fallen back to raw transcription
+        assert inserter.last_text == "raw transcription"
+        # Should have completed well before the 10s sleep would finish
+        assert elapsed < 9.0, f"Took {elapsed:.1f}s — timeout did not fire"

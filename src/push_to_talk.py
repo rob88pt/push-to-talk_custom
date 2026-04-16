@@ -1,7 +1,6 @@
 import os
 import sys
 import time
-import concurrent.futures
 from threading import Thread as _RealThread
 from loguru import logger
 import threading
@@ -715,6 +714,16 @@ class PushToTalkApp:
                         f"Text refinement timed out after {TEXT_REFINEMENT_TIMEOUT_SECONDS}s, "
                         "using original transcription"
                     )
+                    try:
+                        import subprocess
+                        subprocess.Popen(
+                            ["notify-send", "-u", "normal", "-i", "dialog-information",
+                             "-t", "4000",
+                             "Push-to-Talk", "Refinement timed out — inserted raw transcription"],
+                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                        )
+                    except Exception:
+                        pass
                 elif _holder[1] is not None:
                     logger.error(
                         f"Text refinement failed, using original transcription: {_holder[1]}"
