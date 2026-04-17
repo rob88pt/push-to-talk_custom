@@ -6,6 +6,7 @@ from typing import Callable
 from src.gui.validators import (
     validate_openai_api_key,
     validate_deepgram_api_key,
+    validate_groq_api_key,
     validate_cerebras_api_key,
     validate_gemini_api_key,
 )
@@ -38,6 +39,7 @@ class APISection:
         self.deepgram_api_key_var = tk.StringVar()
         self.cerebras_api_key_var = tk.StringVar()
         self.gemini_api_key_var = tk.StringVar()
+        self.groq_api_key_var = tk.StringVar()
         self.custom_api_key_var = tk.StringVar()
         self.stt_model_var = tk.StringVar()
         self.refinement_provider_var = tk.StringVar()
@@ -50,12 +52,14 @@ class APISection:
         self.cerebras_widgets = {}
         self.gemini_widgets = {}
         self.custom_widgets = {}
+        self.groq_widgets = {}
         self.stt_model_combo = None
         self.refinement_model_combo = None
 
         # Provider-specific model selections (to preserve when switching)
         self.openai_stt_model = "gpt-4o-mini-transcribe"
         self.deepgram_stt_model = "nova-3"
+        self.groq_stt_model = "whisper-large-v3-turbo"
 
         # Provider-specific refinement model selections
         self.openai_refinement_model = "gpt-4.1-nano"
@@ -253,6 +257,42 @@ class APISection:
         custom_show_hide_btn.grid(row=0, column=3, padx=(5, 0), pady=2)
         self.custom_widgets["frame"].columnconfigure(1, weight=1)
 
+        # Groq API Key Frame
+        self.groq_widgets["frame"] = ttk.Frame(self.api_keys_frame)
+        self.groq_widgets["frame"].grid(
+            row=5, column=0, columnspan=4, sticky="ew", pady=5
+        )
+
+        ttk.Label(self.groq_widgets["frame"], text="Groq API Key:").grid(
+            row=0, column=0, sticky="w", pady=2
+        )
+        groq_api_key_entry = ttk.Entry(
+            self.groq_widgets["frame"],
+            textvariable=self.groq_api_key_var,
+            show="*",
+            width=50,
+        )
+        groq_api_key_entry.grid(
+            row=0, column=1, columnspan=2, sticky="ew", padx=(10, 0), pady=2
+        )
+
+        def toggle_groq_key_visibility():
+            if groq_api_key_entry["show"] == "*":
+                groq_api_key_entry["show"] = ""
+                groq_show_hide_btn["text"] = "Hide"
+            else:
+                groq_api_key_entry["show"] = "*"
+                groq_show_hide_btn["text"] = "Show"
+
+        groq_show_hide_btn = ttk.Button(
+            self.groq_widgets["frame"],
+            text="Show",
+            command=toggle_groq_key_visibility,
+            width=8,
+        )
+        groq_show_hide_btn.grid(row=0, column=3, padx=(5, 0), pady=2)
+        self.groq_widgets["frame"].columnconfigure(1, weight=1)
+
         # === Speech-to-Text Settings Section ===
         # STT Provider Selection
         ttk.Label(self.frame, text="STT Provider:").grid(
@@ -261,7 +301,7 @@ class APISection:
         stt_provider_combo = ttk.Combobox(
             self.frame,
             textvariable=self.stt_provider_var,
-            values=["openai", "deepgram"],
+            values=["openai", "deepgram", "groq"],
             state="readonly",
             width=20,
         )
@@ -402,6 +442,8 @@ class APISection:
             self.openai_stt_model = current_model
         elif provider_value == "deepgram":
             self.deepgram_stt_model = current_model
+        elif provider_value == "groq":
+            self.groq_stt_model = current_model
 
     def _on_refinement_provider_changed(self, event=None):
         """Handle refinement provider changes - update model options."""
@@ -444,6 +486,7 @@ class APISection:
         # Define model lists
         openai_models = ["whisper-1", "gpt-4o-transcribe", "gpt-4o-mini-transcribe"]
         deepgram_models = ["nova-3", "nova-2", "base", "enhanced", "whisper-medium"]
+        groq_models = ["whisper-large-v3-turbo", "whisper-large-v3"]
 
         # Save the current model to the appropriate provider-specific variable
         # This preserves the selection before we change providers
@@ -451,6 +494,8 @@ class APISection:
             self.openai_stt_model = current_model
         elif current_model in deepgram_models:
             self.deepgram_stt_model = current_model
+        elif current_model in groq_models:
+            self.groq_stt_model = current_model
 
         # Update model options and restore provider-specific selection
         if provider_value == "openai":
@@ -465,6 +510,12 @@ class APISection:
             # Restore the previously selected Deepgram model
             if self.deepgram_stt_model in models:
                 self.stt_model_var.set(self.deepgram_stt_model)
+            else:
+                self.stt_model_var.set(models[0])
+        elif provider_value == "groq":
+            models = groq_models
+            if self.groq_stt_model in models:
+                self.stt_model_var.set(self.groq_stt_model)
             else:
                 self.stt_model_var.set(models[0])
         else:
@@ -504,6 +555,7 @@ class APISection:
         ]
         gemini_models = [
             "gemini-3-flash-preview",
+            "gemini-3.1-flash-lite-preview",
             "gemini-3-pro-preview",
             "gemini-2.5-flash-preview-05-20",
             "gemini-2.5-pro-preview-06-05",
@@ -570,6 +622,7 @@ class APISection:
             "stt_provider": self.stt_provider_var.get(),
             "openai_api_key": self.openai_api_key_var.get().strip(),
             "deepgram_api_key": self.deepgram_api_key_var.get().strip(),
+            "groq_api_key": self.groq_api_key_var.get().strip(),
             "cerebras_api_key": self.cerebras_api_key_var.get().strip(),
             "gemini_api_key": self.gemini_api_key_var.get().strip(),
             "custom_api_key": self.custom_api_key_var.get().strip(),
@@ -585,6 +638,7 @@ class APISection:
         stt_provider: str,
         openai_api_key: str,
         deepgram_api_key: str,
+        groq_api_key: str,
         cerebras_api_key: str,
         gemini_api_key: str,
         custom_api_key: str,
@@ -605,6 +659,7 @@ class APISection:
             stt_provider: STT provider name
             openai_api_key: OpenAI API key
             deepgram_api_key: Deepgram API key
+            groq_api_key: Groq API key
             cerebras_api_key: Cerebras API key
             gemini_api_key: Gemini API key
             custom_api_key: Custom API key
@@ -616,6 +671,7 @@ class APISection:
         # Set API keys
         self.openai_api_key_var.set(openai_api_key)
         self.deepgram_api_key_var.set(deepgram_api_key)
+        self.groq_api_key_var.set(groq_api_key)
         self.cerebras_api_key_var.set(cerebras_api_key)
         self.gemini_api_key_var.set(gemini_api_key)
         self.custom_api_key_var.set(custom_api_key)
@@ -627,6 +683,8 @@ class APISection:
             self.openai_stt_model = stt_model
         elif stt_provider == "deepgram":
             self.deepgram_stt_model = stt_model
+        elif stt_provider == "groq":
+            self.groq_stt_model = stt_model
 
         if refinement_provider == "openai":
             self.openai_refinement_model = refinement_model
@@ -662,6 +720,8 @@ class APISection:
                 models = ["whisper-1", "gpt-4o-transcribe", "gpt-4o-mini-transcribe"]
             elif provider == "deepgram":
                 models = ["nova-3", "nova-2", "base", "enhanced", "whisper-medium"]
+            elif provider == "groq":
+                models = ["whisper-large-v3-turbo", "whisper-large-v3"]
             else:
                 models = []
             self.stt_model_combo["values"] = models
@@ -694,6 +754,7 @@ class APISection:
             elif provider == "gemini":
                 models = [
                     "gemini-3-flash-preview",
+                    "gemini-3.1-flash-lite-preview",
                     "gemini-3-pro-preview",
                     "gemini-2.5-flash-preview-05-20",
                     "gemini-2.5-pro-preview-06-05",
@@ -761,6 +822,28 @@ class APISection:
         if values["deepgram_api_key"]:
             status_lines.append(
                 f"  Key: {'*' * min(len(values['deepgram_api_key']), 20)}"
+            )
+
+        # Test Groq
+        groq_status = "Not configured"
+        groq_prefix = "[ ]"
+        if values["groq_api_key"]:
+            try:
+                validate_groq_api_key(values["groq_api_key"])
+                groq_status = "VALID"
+                groq_prefix = "[OK]"
+            except Exception as e:
+                groq_status = str(e)
+                groq_prefix = "[X]"
+
+        selected_marker = (
+            " (Selected STT Model)" if values["stt_provider"] == "groq" else ""
+        )
+        status_lines.append(f"\n{groq_prefix} Groq{selected_marker}:")
+        status_lines.append(f"  Status: {groq_status}")
+        if values["groq_api_key"]:
+            status_lines.append(
+                f"  Key: {'*' * min(len(values['groq_api_key']), 20)}"
             )
 
         # Test Cerebras
@@ -847,6 +930,10 @@ class APISection:
         elif values["stt_provider"] == "deepgram" and deepgram_prefix == "[X]":
             status_lines.append(
                 "\n*** WARNING: Selected STT provider (Deepgram) has an invalid API key!"
+            )
+        elif values["stt_provider"] == "groq" and groq_prefix == "[X]":
+            status_lines.append(
+                "\n*** WARNING: Selected STT provider (Groq) has an invalid API key!"
             )
 
         if values["refinement_provider"] == "openai" and openai_prefix == "[X]":
