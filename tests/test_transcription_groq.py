@@ -1,7 +1,6 @@
 import pytest
 import os
 from unittest.mock import MagicMock
-from loguru import logger
 
 from src.transcription_groq import GroqTranscriber
 from src.exceptions import ConfigurationError, TranscriptionError, APIError

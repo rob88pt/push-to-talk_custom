@@ -13,7 +13,16 @@ _RETRY_DELAY = 3  # seconds
 
 
 class GroqTranscriber(TranscriberBase):
+    """Transcriber implementation using the Groq API (Whisper models)."""
+
     def __init__(self, api_key: Optional[str] = None, model: str = "whisper-large-v3-turbo"):
+        """
+        Initialize the transcriber with Groq API.
+
+        Args:
+            api_key: Groq API key. If None, will use GROQ_API_KEY environment variable
+            model: STT Model to use (default: whisper-large-v3-turbo)
+        """
         api_key = api_key or os.getenv("GROQ_API_KEY")
         super().__init__(api_key, "Groq")
         self.model = model
@@ -22,6 +31,16 @@ class GroqTranscriber(TranscriberBase):
     def transcribe_audio(
         self, audio_file_path: str, language: Optional[str] = None
     ) -> Optional[str]:
+        """
+        Transcribe audio file to text using Groq API.
+
+        Args:
+            audio_file_path: Path to the audio file
+            language: Language code (optional, auto-detect if None)
+
+        Returns:
+            Transcribed text or None if transcription failed
+        """
         if not validate_audio_file_exists(audio_file_path):
             return None
         if not validate_audio_duration(audio_file_path):
@@ -46,11 +65,23 @@ class GroqTranscriber(TranscriberBase):
                         prompt=prompt,
                     )
 
-                if not response or not response.text.strip():
+                if not response:
                     logger.error("Groq transcription API returned empty response")
                     return None
 
-                transcribed_text = response.text.strip()
+                if hasattr(response, "text"):
+                    transcribed_text = response.text
+                elif isinstance(response, str):
+                    transcribed_text = response
+                else:
+                    logger.warning("Unknown transcription response format, using string representation")
+                    transcribed_text = str(response)
+
+                if not transcribed_text or not transcribed_text.strip():
+                    logger.error("Groq transcription API returned empty response")
+                    return None
+
+                transcribed_text = transcribed_text.strip()
                 transcription_time = time.time() - start_time
                 logger.info(
                     f"Transcription successful: {len(transcribed_text)} characters in {transcription_time:.2f}s"
