@@ -132,7 +132,7 @@ Fork delta — changes to `APISection`:
 
 5. **`get_values()`**: include `"groq_api_key": self.groq_api_key_var.get().strip()`.
 
-6. **`set_values()`**: accept `groq_api_key` param; store as `self.groq_stt_model = stt_model` when `stt_provider == "groq"`.
+6. **`set_values()`**: accept `groq_api_key` param; set `self.groq_api_key_var`; store `stt_model` into `self.groq_stt_model` when `stt_provider == "groq"`.
 
 7. **`test_api_keys()`**: add Groq validation block calling `validate_groq_api_key()`, same pattern as OpenAI/Deepgram blocks.
 
