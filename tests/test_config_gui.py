@@ -165,13 +165,14 @@ def test_update_gui_from_config_updates_provider_fields(prepared_config_gui):
         "openai",
         "openai-key",
         "",
+        gui.config.groq_api_key,
         gui.config.cerebras_api_key,
         gui.config.gemini_api_key,
         gui.config.custom_api_key,
         gui.config.stt_model,
         gui.config.refinement_provider,
         gui.config.refinement_model,
-        gui.config.custom_endpoint,
+        custom_endpoint=gui.config.custom_endpoint,
     )
     gui.app_instance = MagicMock()
     gui.on_config_changed = MagicMock()
@@ -232,13 +233,14 @@ def test_stt_model_preserved_when_switching_providers(prepared_config_gui):
         "openai",
         gui.config.openai_api_key,
         gui.config.deepgram_api_key,
+        gui.config.groq_api_key,
         gui.config.cerebras_api_key,
         gui.config.gemini_api_key,
         gui.config.custom_api_key,
         "gpt-4o-transcribe",
         gui.config.refinement_provider,
         gui.config.refinement_model,
-        gui.config.custom_endpoint,
+        custom_endpoint=gui.config.custom_endpoint,
     )
 
     # Mock the stt_model_combo widget
