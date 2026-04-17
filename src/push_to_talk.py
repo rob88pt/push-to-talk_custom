@@ -50,6 +50,7 @@ class PushToTalkConfig(BaseModel):
     )
     openai_api_key: str = Field(default="", description="OpenAI API key")
     deepgram_api_key: str = Field(default="", description="Deepgram API key")
+    groq_api_key: str = Field(default="", description="Groq API key")
     stt_model: str = Field(default="nova-3", description="STT model name")
     language: str = Field(
         default="auto", description="Transcription language (e.g., 'en', 'es', 'auto')"
@@ -108,9 +109,9 @@ class PushToTalkConfig(BaseModel):
     @field_validator("stt_provider")
     @classmethod
     def validate_stt_provider(cls, v: str) -> str:
-        """Validate STT provider is either 'openai' or 'deepgram'."""
-        if v not in ["openai", "deepgram"]:
-            raise ValueError(f"stt_provider must be 'openai' or 'deepgram', got '{v}'")
+        """Validate STT provider is either 'openai', 'deepgram', or 'groq'."""
+        if v not in ["openai", "deepgram", "groq"]:
+            raise ValueError(f"stt_provider must be 'openai', 'deepgram', or 'groq', got '{v}'")
         return v
 
     @field_validator("refinement_provider")
@@ -231,6 +232,13 @@ class PushToTalkApp:
                 if not self.config.deepgram_api_key:
                     raise ConfigurationError(
                         "Deepgram API key is required. Set DEEPGRAM_API_KEY environment variable or provide in config."
+                    )
+        elif self.config.stt_provider == "groq":
+            if not self.config.groq_api_key:
+                self.config.groq_api_key = os.getenv("GROQ_API_KEY")
+                if not self.config.groq_api_key:
+                    raise ConfigurationError(
+                        "Groq API key is required. Set GROQ_API_KEY environment variable or provide in config."
                     )
         else:
             raise ConfigurationError(
@@ -367,6 +375,8 @@ class PushToTalkApp:
             api_key = self.config.openai_api_key or os.getenv("OPENAI_API_KEY")
         elif self.config.stt_provider == "deepgram":
             api_key = self.config.deepgram_api_key or os.getenv("DEEPGRAM_API_KEY")
+        elif self.config.stt_provider == "groq":
+            api_key = self.config.groq_api_key or os.getenv("GROQ_API_KEY")
         else:
             raise ConfigurationError(
                 f"Unknown STT provider: {self.config.stt_provider}"
