@@ -2,6 +2,7 @@ from typing import List, Optional
 from src.transcription_base import TranscriberBase
 from src.transcription_openai import OpenAITranscriber
 from src.transcription_deepgram import DeepgramTranscriber
+from src.transcription_groq import GroqTranscriber
 
 
 class TranscriberFactory:
@@ -18,7 +19,7 @@ class TranscriberFactory:
         Create and return a transcriber instance.
 
         Args:
-            provider: The transcription provider ("openai" or "deepgram")
+            provider: The transcription provider ("openai", "deepgram", or "groq")
             api_key: API key for the selected provider
             model: Model name to use for transcription
             glossary: Optional list of custom terms for improved recognition
@@ -33,10 +34,11 @@ class TranscriberFactory:
             transcriber = OpenAITranscriber(api_key=api_key, model=model)
         elif provider == "deepgram":
             transcriber = DeepgramTranscriber(api_key=api_key, model=model)
+        elif provider == "groq":
+            transcriber = GroqTranscriber(api_key=api_key, model=model)
         else:
             raise ValueError(f"Unknown transcription provider: {provider}")
 
-        # Set glossary if provided
         if glossary:
             transcriber.set_glossary(glossary)
 

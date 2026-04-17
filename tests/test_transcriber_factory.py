@@ -171,3 +171,32 @@ class TestTranscriberFactory:
         assert transcriber.glossary == []
 
         logger.info("Create transcriber without glossary test passed")
+
+    def test_create_groq_transcriber(self, mocker):
+        mocker.patch("src.transcription_groq.groq.Groq")
+        transcriber = TranscriberFactory.create_transcriber(
+            provider="groq", api_key="test-groq-key", model="whisper-large-v3-turbo"
+        )
+        from src.transcription_groq import GroqTranscriber
+        assert isinstance(transcriber, GroqTranscriber)
+        assert isinstance(transcriber, TranscriberBase)
+        assert transcriber.api_key == "test-groq-key"
+        assert transcriber.model == "whisper-large-v3-turbo"
+
+    def test_create_groq_transcriber_alternative_model(self, mocker):
+        mocker.patch("src.transcription_groq.groq.Groq")
+        transcriber = TranscriberFactory.create_transcriber(
+            provider="groq", api_key="test-key", model="whisper-large-v3"
+        )
+        from src.transcription_groq import GroqTranscriber
+        assert isinstance(transcriber, GroqTranscriber)
+        assert transcriber.model == "whisper-large-v3"
+
+    def test_all_transcribers_implement_base_interface_includes_groq(self, mocker):
+        mocker.patch("src.transcription_groq.groq.Groq")
+        groq_transcriber = TranscriberFactory.create_transcriber(
+            provider="groq", api_key="test-key", model="whisper-large-v3-turbo"
+        )
+        assert isinstance(groq_transcriber, TranscriberBase)
+        assert hasattr(groq_transcriber, "transcribe_audio")
+        assert callable(groq_transcriber.transcribe_audio)
