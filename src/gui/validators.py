@@ -21,14 +21,21 @@ def validate_configuration(config: PushToTalkConfig) -> tuple[bool, str | None]:
             return (
                 False,
                 "OpenAI API key is required when using OpenAI provider!\n\n"
-                "Please enter your OpenAI API key or switch to Deepgram provider.",
+                "Please enter your OpenAI API key or switch to another provider.",
             )
     elif config.stt_provider == "deepgram":
         if not config.deepgram_api_key.strip():
             return (
                 False,
                 "Deepgram API key is required when using Deepgram provider!\n\n"
-                "Please enter your Deepgram API key or switch to OpenAI provider.",
+                "Please enter your Deepgram API key or switch to another provider.",
+            )
+    elif config.stt_provider == "groq":
+        if not config.groq_api_key.strip():
+            return (
+                False,
+                "Groq API key is required when using Groq provider!\n\n"
+                "Please enter your Groq API key or switch to another provider.",
             )
     else:
         return False, f"Unknown provider: {config.stt_provider}"
@@ -186,6 +193,42 @@ def validate_gemini_api_key(api_key: str) -> bool:
             raise Exception("INVALID - Access forbidden")
         elif "404" in error_msg:
             raise Exception("INVALID - API endpoint not found")
+        elif "timeout" in error_msg.lower():
+            raise Exception("TIMEOUT - Network issue")
+        else:
+            raise Exception(f"ERROR - {error_msg[:60]}...")
+
+
+def validate_groq_api_key(api_key: str) -> bool:
+    """
+    Validate Groq API key by making a test request.
+
+    Args:
+        api_key: Groq API key to validate
+
+    Returns:
+        True if valid, False otherwise
+
+    Raises:
+        Exception: With descriptive error message
+    """
+    try:
+        import groq
+
+        client = groq.Groq(api_key=api_key)
+        _ = client.models.list()
+        return True
+    except Exception as e:
+        error_msg = str(e)
+        if (
+            "401" in error_msg
+            or "invalid_api_key" in error_msg
+            or "Authentication" in error_msg
+            or "Unauthorized" in error_msg
+        ):
+            raise Exception("INVALID - Incorrect API key")
+        elif "403" in error_msg or "Forbidden" in error_msg:
+            raise Exception("INVALID - Access forbidden")
         elif "timeout" in error_msg.lower():
             raise Exception("TIMEOUT - Network issue")
         else:
