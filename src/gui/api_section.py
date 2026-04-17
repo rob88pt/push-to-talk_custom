@@ -555,7 +555,6 @@ class APISection:
         ]
         gemini_models = [
             "gemini-3-flash-preview",
-            "gemini-3.1-flash-lite-preview",
             "gemini-3-pro-preview",
             "gemini-2.5-flash-preview-05-20",
             "gemini-2.5-pro-preview-06-05",
@@ -754,7 +753,6 @@ class APISection:
             elif provider == "gemini":
                 models = [
                     "gemini-3-flash-preview",
-                    "gemini-3.1-flash-lite-preview",
                     "gemini-3-pro-preview",
                     "gemini-2.5-flash-preview-05-20",
                     "gemini-2.5-pro-preview-06-05",
